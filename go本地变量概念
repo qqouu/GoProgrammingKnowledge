@@ -48,3 +48,84 @@
 [15] [https://www.freecodecamp.org](https://www.freecodecamp.org/news/how-to-get-started-coding-in-golang/)
 [16] [https://go.dev](https://go.dev/blog/inliner)
 [17] [https://www.kelche.co](https://www.kelche.co/blog/go/scope-and-lifetimes/)
+
+在计算机科学中，词法作用域 (Lexical Scoping)，也常被称为静态作用域 (Static Scoping)。 [1, 2] 
+简单来说，“词法（Lexical）”一词源于“文本（Textual）”。这意味着一个变量的可见范围，是在你写下代码的那一刻、根据代码的物理位置就决定了的，而不是根据程序运行时的调用顺序。 [3, 4, 5] 
+以下是基于英文语料库的核心要点：
+1. 核心特征：位置决定一切
+
+* 编译时确定：变量的范围在代码编译（或解析）阶段就已经固定，编译器通过阅读源代码文本就能确定某个变量指向哪里。
+* 向外查找（Bubbling up）：当你在一个函数内部引用一个变量时，Go 会先在当前函数（本地块）找；找不到，就去包围它的外层函数找；一直找直到全局（包级）作用域。
+* 出生地原则：一个函数能访问哪些变量，取决于它在哪里被定义，而不是在哪里被调用。 [6, 7, 8, 9, 10, 11] 
+
+2. 它是如何运作的？（对比动态作用域）
+为了更好地理解，我们可以对比一下“动态作用域”（如 Bash 或早期 Lisp 使用的规则）： [12, 13] 
+
+| 特性 [4, 6, 11, 14] | 词法作用域 (Go, C, Java, JS) | 动态作用域 (Bash, Perl部分模式) |
+|---|---|---|
+| 依据 | 代码写在哪里 (Source code location) | 函数谁调用的 (Call stack) |
+| 可预测性 | 高：看一眼源码就知道结果 | 低：取决于程序运行到了哪一步 |
+| 搜索路径 | 物理嵌套的外层代码块 | 运行时的调用堆栈 |
+
+3. 在 Go 语言中的实际意义
+
+* 支持闭包 (Closures)：正是因为词法作用域，内部函数才能“捕捉”并记住它诞生时所在环境的变量，即使外部函数已经执行完毕。
+* 代码安全性：开发者不需要担心某个外部调用者会意外地“注入”或修改函数内部引用的非局部变量，因为作用域链是静态锁定的。
+* 变量遮蔽 (Shadowing)：因为编译器是按文本层次查找的，如果你在内层声明了一个同名变量，它会直接遮断对外部同名变量的访问。 [1, 15, 16, 17] 
+
+一句话总结：
+词法作用域意味着“函数记得它出生的地方”。无论这个函数被传到哪里、被谁调用，它寻找变量的路径永远是顺着源代码的嵌套结构往外走。 [18] 
+
+[1] [https://www.ituonline.com](https://www.ituonline.com/tech-definitions/what-is-lexical-scoping/)
+[2] [https://www.techtarget.com](https://www.techtarget.com/whatis/definition/lexical-scoping-static-scoping)
+[3] [https://www.greatfrontend.com](https://www.greatfrontend.com/questions/quiz/explain-the-concept-of-lexical-scoping)
+[4] [https://prl.khoury.northeastern.edu](https://prl.khoury.northeastern.edu/blog/2019/09/05/lexical-and-dynamic-scope/)
+[5] [https://medium.com](https://medium.com/@awaisniaz1995/lexical-scoping-explained-the-invisible-power-behind-clean-code-ce573c83db50)
+[6] [https://dev.to](https://dev.to/pranav016/advanced-javascript-series-part-41-global-function-and-block-scope-lexical-vs-dynamic-scoping-20pg)
+[7] [https://www.ituonline.com](https://www.ituonline.com/tech-definitions/what-is-lexical-scoping/#:~:text=Definition:%20Lexical%20Scoping%20Lexical%20scoping%2C%20also%20known,the%20function%20is%20executed%20%28or%20at%20run%2Dtime%29.)
+[8] [https://medium.com](https://medium.com/@shadeshsaha45/understanding-scope-in-go-5af9c433877d)
+[9] [https://medium.com](https://medium.com/altcampus/scope-local-global-and-lexical-e164f53450b3)
+[10] [https://medium.com](https://medium.com/@littletonconnor/understanding-lexical-scope-in-javascript-f17187fb148)
+[11] [https://www.greatfrontend.com](https://www.greatfrontend.com/questions/quiz/explain-the-concept-of-lexical-scoping)
+[12] [https://prl.khoury.northeastern.edu](https://prl.khoury.northeastern.edu/blog/2019/09/05/lexical-and-dynamic-scope/)
+[13] [https://www.scaler.com](https://www.scaler.com/topics/dynamic-vs-lexical-scoping-in-r/)
+[14] [https://medium.com](https://medium.com/@osmanakar_65575/javascript-lexical-and-dynamic-scoping-72c17e4476dd)
+[15] [https://stackoverflow.com](https://stackoverflow.com/questions/28376340/lexical-scoping-in-golang)
+[16] [https://medium.com](https://medium.com/@awaisniaz1995/lexical-scoping-explained-the-invisible-power-behind-clean-code-ce573c83db50)
+[17] [https://medium.com](https://medium.com/@sanyamdubey28/functions-in-go-syntax-scope-and-use-cases-5a73683532ff#:~:text=Closures%20and%20Lexical%20Scope%20Go%20supports%20closures%2C,after%20the%20outer%20function%20has%20finished%20executing.&text=Here%2C%20the%20inner%20function%20retains%20access%20to%20count%20because%20of%20Go%27s%20lexical%20scoping.)
+[18] [https://dev-aditya.medium.com](https://dev-aditya.medium.com/lexical-vs-dynamic-scoping-1ee3c50f26ea)
+
+所以go语言不是动态作用对吧
+是的，Go 语言不是动态作用域（Dynamic Scoping）。
+Go 严格采用的是 词法作用域（Lexical Scoping），也叫静态作用域。
+为了让你更直观地理解两者的区别，我们可以用一段伪代码来对比。如果 Go 支持动态作用域（实际上不支持），结果会完全不同：
+
+var x = 10
+func printX() {
+    fmt.Println(x)
+}
+func main() {
+    var x = 20
+    printX() 
+}
+
+1. 在 Go 的实际表现中（词法作用域）：
+
+* 输出结果：10
+* 原因：printX 在定义时，它的外层（物理位置）是全局变量 x = 10。无论它在哪里被调用，它只认“出生地”旁边的那个 x。
+
+2. 如果 Go 是动态作用域（假设）：
+
+* 输出结果：20
+* 原因：程序会看“谁调用了我”。因为是在 main 函数里调用的，而 main 函数里刚好有一个 x = 20，它就会直接抓取调用栈（Call Stack）里最近的那个变量。
+
+为什么 Go 坚持使用词法作用域？
+
+   1. 可预测性：你只需要看这一行代码附近的上下层代码，就能确定变量的来源。不需要去跟踪复杂的程序运行路径。
+   2. 性能：编译器在编译阶段就能确定变量的内存地址或偏移量，不需要在运行时去“找”变量，速度更快。
+   3. 安全性：防止了函数内部的行为被外部调用者通过同名变量意外干扰。
+
+总结：
+在 Go 里面，代码的位置决定了变量的归属，而不是运行时的调用顺序。
+
+
