@@ -1,0 +1,47 @@
+在 Go 语言中，“引用”并不是一个像 C++ 那样严谨的语言级术语（Go 没有 C++ 那种实体的“引用变量”），它通常在两个层面被提及：引用类型和底层数据的指向关系。
+1. 核心结论：Go 只有值传递
+首先要明确的是，Go 语言中所有的参数传递都是值传递（Pass by Value）。当你把一个变量传给函数时，Go 总是会创建这个变量的一个副本。 [1, 2] 
+所谓的“引用感”，是因为某些类型的“值”本身就是一个包含了指向底层数据地址的指针的结构体。 [3, 4] 
+2. 所谓的“引用类型”有哪些？
+在开发中，大家习惯将以下类型称为“引用类型”，因为它们在函数间传递后，对副本的修改可能会影响原始数据：
+
+* 切片 (Slice)：切片本质上是一个结构体，包含指向底层数组的指针、长度和容量。传递切片时复制了指针，所以函数内修改元素会影响原数组。
+* 映射 (Map)：Map 是指向底层哈希表结构的指针。
+* 通道 (Channel)：Channel 本质上也是指向底层并发安全队列的指针。
+* 函数 (Function)：函数在 Go 中也是引用类型。
+* 指针 (Pointer)：显式存储内存地址的类型。 [5, 6, 7] 
+
+3. 指针 vs. 引用
+这是最容易混淆的地方：
+
+* 指针 (Pointer)：是一个显式的变量，存储了另一个变量的内存地址。你需要用 * 来声明和解引用，用 & 来取地址。
+* 引用 (Reference)：在 Go 的语境下，它更多是指一种行为。例如，“切片引用了数组”，意味着切片内部持有了数组的地址，让你能间接操作它。 [8, 9, 10] 
+
+4. 为什么会有这种设计？
+Go 舍弃了复杂的引用变量（类似 C++ 的 alias），选择了更直观的指针和值拷贝。这样做的原因包括：
+
+   1. 清晰性：通过指针（*T），你可以一眼看出函数是否会修改原数据。
+   2. 效率：对于大数据结构，传递指针只需拷贝几个字节的地址，而不需要拷贝整个结构。
+   3. 简单性：避免了像 Java 或 C++ 那样复杂的引用传递规则。 [11, 12] 
+
+总结建议
+如果你是初学者，与其纠结“什么是引用”，不如记住：Go 永远在拷贝。
+
+* 如果你拷贝的是个 int，改副本不影响原值。
+* 如果你拷贝的是个 *int（指针），副本和原值都指向同一个地址，改地址里的内容就会互相影响。 [13, 14] 
+
+
+[1] [https://medium.com](https://medium.com/@samrat.alam/understanding-pointers-call-by-value-reference-in-go-from-beginner-to-advanced-55089c4cc8a1)
+[2] [https://www.upyun.com](https://www.upyun.com/tech/article/714/%E9%9D%A2%E8%AF%95%E5%AE%98%E9%97%AE%EF%BC%9AGo%20%E4%B8%AD%E7%9A%84%E5%8F%82%E6%95%B0%E4%BC%A0%E9%80%92%E6%98%AF%E5%80%BC%E4%BC%A0%E9%80%92%E8%BF%98%E6%98%AF%E5%BC%95%E7%94%A8%E4%BC%A0%E9%80%92%EF%BC%9F.html#:~:text=%E5%9B%A0%E4%B8%BA%E5%9C%A8%20Golang%20%E4%B8%AD%E6%89%80%E6%9C%89%E7%9A%84%E7%B1%BB%E5%9E%8B%E4%BC%A0%E9%80%92%E9%83%BD%E6%98%AF%E9%80%9A%E8%BF%87%E5%80%BC%E4%BC%A0%E9%80%92%E5%AE%9E%E7%8E%B0%E7%9A%84%EF%BC%8C%E8%80%8C%E4%B8%8D%E6%98%AF%E5%BC%95%E7%94%A8%E4%BC%A0%E9%80%92%EF%BC%8C%E5%8D%B3%E4%BD%BF%E6%98%AF%E6%8C%87%E9%92%88%E7%9A%84%E4%BC%A0%E9%80%92%E4%B9%9F%E6%98%AF%E9%80%9A%E8%BF%87%20copy%20%E6%8C%87%E9%92%88%E7%9A%84%E6%96%B9%E5%BC%8F%E8%BF%9B%E8%A1%8C%E3%80%82)
+[3] [https://github.com](https://github.com/go101/go101/wiki/About-the-terminology-%22reference-type%22-in-Go)
+[4] [https://www.freecodecamp.org](https://www.freecodecamp.org/news/learn-how-to-use-pointers-in-go-with-example-code/)
+[5] [https://www.infoq.com](https://www.infoq.com/articles/go-pointers-references-graphs-tutorial/)
+[6] [https://www.mianshiya.com](https://www.mianshiya.com/comment/1958110399216467970#:~:text=Go%20%E8%AF%AD%E8%A8%80%E4%B8%AD%E7%9A%84%E5%BC%95%E7%94%A8%E7%B1%BB%E5%9E%8B%E9%80%9A%E4%BF%97%E8%A7%A3%E9%87%8A%E5%A6%82%E4%B8%8B%EF%BC%9A%20%23%23%20%E4%BB%80%E4%B9%88%E6%98%AF%E5%BC%95%E7%94%A8%E7%B1%BB%E5%9E%8B%EF%BC%9F%20%E5%BC%95%E7%94%A8%E7%B1%BB%E5%9E%8B%E6%98%AF%E6%8C%87**%E5%AD%98%E5%82%A8%E7%9A%84%E6%98%AF%E6%95%B0%E6%8D%AE%E7%9A%84%E5%9C%B0%E5%9D%80%E6%88%96%E5%BC%95%E7%94%A8**%EF%BC%8C%E8%80%8C%E4%B8%8D%E6%98%AF%E6%95%B0%E6%8D%AE%E6%9C%AC%E8%BA%AB%E3%80%82%E5%A4%9A%E4%B8%AA%E5%8F%98%E9%87%8F%E5%8F%AF%E4%BB%A5%E6%8C%87%E5%90%91%E5%90%8C%E4%B8%80%E5%9D%97%E5%86%85%E5%AD%98%E5%9C%B0%E5%9D%80%EF%BC%8C%E4%BF%AE%E6%94%B9%E5%85%B6%E4%B8%AD%E4%B8%80%E4%B8%AA%E4%BC%9A%E5%BD%B1%E5%93%8D%E5%85%B6%E4%BB%96%E5%BC%95%E7%94%A8%E3%80%82%20%23%23%20Go%20%E8%AF%AD%E8%A8%80%E7%9A%84%E5%BC%95%E7%94%A8%E7%B1%BB%E5%9E%8B%23%23%23%201.%20**%E5%88%87%E7%89%87%EF%BC%88Slice%EF%BC%89**%20%60%60%60go%20//%20%E5%88%87%E7%89%87%E6%98%AF%E6%95%B0%E7%BB%84%E7%9A%84%E5%BC%95%E7%94%A8;)
+[7] [https://go101.org](https://go101.org/article/value-part.html#:~:text=only%20slice%2C%20map%2C%20channel%20and%20function%20types,reference%20types%29.%20references%20are%20opposites%20of%20values.)
+[8] [https://go101.org](https://go101.org/article/pointer.html#:~:text=About%20the%20Word%20%22Reference%22%20In%20Go%20101%2C,Go%20101%20are%20consistent%20with%20Go%20specification.)
+[9] [https://www.youtube.com](https://www.youtube.com/watch?v=4B2rwYvuiBo&t=2)
+[10] [https://www.youtube.com](https://www.youtube.com/watch?v=wqyvS27MkR0)
+[11] [https://blog.cubed.run](https://blog.cubed.run/most-people-dont-understand-why-go-uses-pointers-instead-of-references-bad755dea39f)
+[12] [https://medium.com](https://medium.com/@annapeterson89/whats-the-point-of-golang-pointers-everything-you-need-to-know-ac5e40581d4d)
+[13] [https://stackoverflow.com](https://stackoverflow.com/questions/47296325/passing-by-reference-and-value-in-go-to-functions)
+[14] [https://www.infoq.com](https://www.infoq.com/articles/go-pointers-references-graphs-tutorial/)
