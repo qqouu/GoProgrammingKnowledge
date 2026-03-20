@@ -1,0 +1,50 @@
+在 Go 语言中，“本地变量”（Local Variable）确实对应英文中的 Local Variable。它在编程中既是一个相对的概念，在 Go 的语言规范（Language Specification）中也有严格的定义。
+通过对英文语料库和 Go 官方文档的检索，可以从以下三个维度来理解“本地”的具体含义：
+1. 严格定义：基于“块”（Block）的范围
+在 Go 的语料库中，本地变量被严格定义为在函数体或代码块内部声明的变量。 [1, 2] 
+
+* 界限：它的范围（Scope）由最近的一对花括号 { } 决定。
+* 可见性：该变量仅在其声明的代码块及其嵌套的子块中可见。一旦程序运行超出这个花括号，该变量就不可被访问，其占用的内存通常会被回收。 [3, 4, 5, 6] 
+
+2. 相对概念：词法作用域（Lexical Scoping）
+“本地”也是一个相对的概念，这源于 Go 使用的词法作用域（Lexical Scoping）规则： [7, 8] 
+
+* 相对于父级：在一个嵌套函数（如闭包）中，相对于内部函数，外部函数的变量是“外部”的；但相对于整个包（Package）级别，它们依然都是“本地”的。
+* 遮蔽效应（Shadowing）：如果你在内部块中声明了一个同名变量，它会“遮蔽”外部块的变量。此时，“本地”指代的就是离当前执行点最近的那层定义。 [9, 10, 11, 12] 
+
+3. 与“包级变量”的区别
+英文语料中通常将 Local Variables 与 Package-level Variables（有时非正式地称为 Global Variables）进行对比： [13, 14] 
+
+* 本地变量：定义在 func 内部。Go 编译器对本地变量有严格要求：声明了就必须使用，否则无法通过编译。
+* 包级变量：定义在所有 func 之外。它们在整个包内可见，如果首字母大写，甚至可以被其他包引用。 [3, 15, 16, 17] 
+
+英文语料核心术语翻译对照
+
+| 英文原词 (English Term) | 中文对应 (Chinese Translation) | 具体含义说明 |
+|---|---|---|
+| Function Scope | 函数作用域 | 变量仅在所属函数内有效。 |
+| Block Scope | 块作用域 | 变量仅在 if, for, switch 等 {} 块内有效。 |
+| Lexical Scoping | 词法作用域 | 作用域由源代码的书写位置（文本结构）决定。 |
+| Shadowing | 变量遮蔽 | 内层本地变量覆盖了外层同名变量的可见性。 |
+| Lifetime | 生命周期 | 变量从创建到被销毁的时间段。 |
+
+总结：
+在 Go 中，“本地”不是随意的口头语，它特指非包级（Non-package-level）的、被限制在特定代码块生命周期内的变量。它的严格性体现在编译器层面（如禁止未使用）和内存分配层面（优先尝试在栈上分配，除非发生逃逸分析）。
+
+[1] [https://medium.com](https://medium.com/techpoooh/how-do-variables-work-in-go-language-f9b3d18907c0)
+[2] [https://www.geeksforgeeks.org](https://www.geeksforgeeks.org/go-language/scope-of-variables-in-go/#:~:text=Local%20variables%20are%20declared%20within%20a%20function,but%20are%20limited%20to%20the%20block%20scope.)
+[3] [https://www.youtube.com](https://www.youtube.com/watch?v=pm227gooPfk)
+[4] [https://www.ibm.com](https://www.ibm.com/docs/en/informix-servers/12.10.0?topic=variables-scope-local#:~:text=A%20local%20variable%20is%20valid%20within%20the,redefine%20the%20variable%20within%20the%20statement%20block.)
+[5] [https://www.bbc.co.uk](https://www.bbc.co.uk/bitesize/guides/z2q6hyc/revision/3#:~:text=A%20local%20variable%20is%20declared%20within%20one,variable%20is%20no%20longer%20retained%20in%20RAM.)
+[6] [https://www.geeksforgeeks.org](https://www.geeksforgeeks.org/dsa/difference-between-local-variable-and-global-variable/#:~:text=Local%20variables%20are%20declared%20within%20a%20specific,of%20the%20program%2C%20persisting%20throughout%20its%20execution.)
+[7] [https://stackoverflow.com](https://stackoverflow.com/questions/1047454/what-is-lexical-scope)
+[8] [https://www.geeksforgeeks.org](https://www.geeksforgeeks.org/go-language/scope-of-variables-in-go/)
+[9] [https://stackoverflow.com](https://stackoverflow.com/questions/28376340/lexical-scoping-in-golang)
+[10] [https://www.techtarget.com](https://www.techtarget.com/whatis/definition/lexical-scoping-static-scoping)
+[11] [https://gomakethings.com](https://gomakethings.com/guides/scope/local-scope/)
+[12] [https://www.scaler.com](https://www.scaler.com/topics/golang/scope-of-variables-in-go/)
+[13] [https://akemara.medium.com](https://akemara.medium.com/understanding-variable-scope-in-golang-local-vs-global-variables-03c03dd23006)
+[14] [https://www.tutorialspoint.com](https://www.tutorialspoint.com/go/go_scope_rules.htm#:~:text=Previous.%20A%20scope%20in%20any%20programming%20is,the%20definition%20of%20function%20parameters%20%28formal%20parameters%29)
+[15] [https://www.freecodecamp.org](https://www.freecodecamp.org/news/how-to-get-started-coding-in-golang/)
+[16] [https://go.dev](https://go.dev/blog/inliner)
+[17] [https://www.kelche.co](https://www.kelche.co/blog/go/scope-and-lifetimes/)
