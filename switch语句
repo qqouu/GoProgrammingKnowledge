@@ -1,0 +1,344 @@
+## Go 语言 `switch` 语句详解
+
+Go 语言的 `switch` 非常灵活，不仅支持传统的数值分支，还支持多值匹配、无表达式、类型断言等高级用法。以下是所有常见用法的详细介绍。
+
+---
+
+### 1. 基本语法
+
+```go
+switch 初始化语句; 表达式 {
+case 值1, 值2, ...:
+    语句块
+case 值3, 值4, ...:
+    语句块
+default:
+    语句块
+}
+```
+
+- **表达式**可以是任意类型的值（包括字符串、结构体等），只要 `case` 后面提供的值与之类型相同且可比较。
+- **每个 `case` 可以写多个值**，用逗号分隔，满足任意一个即执行。
+- **自动 break**：执行完一个 `case` 后自动退出 `switch`，不需要写 `break`。
+- **`fallthrough`**：如果想继续执行下一个 `case`，可显式使用 `fallthrough`。
+- **`default`**：可省略，位置任意（通常放最后）。
+
+---
+
+### 2. 基本用法：单值匹配
+
+```go
+grade := "B"
+
+switch grade {
+case "A":
+    fmt.Println("优秀")
+case "B":
+    fmt.Println("良好")
+case "C":
+    fmt.Println("及格")
+default:
+    fmt.Println("不及格")
+}
+// 输出：良好
+```
+
+---
+
+### 3. 多值匹配（一个 case 多个值）
+
+```go
+day := "Saturday"
+
+switch day {
+case "Saturday", "Sunday":
+    fmt.Println("周末")
+case "Monday", "Tuesday", "Wednesday", "Thursday", "Friday":
+    fmt.Println("工作日")
+default:
+    fmt.Println("无效日期")
+}
+// 输出：周末
+```
+
+---
+
+### 4. 无表达式的 switch（替代 if-else 链）
+
+省略 `switch` 后面的表达式，此时每个 `case` 后面必须是一个布尔表达式，Go 会执行第一个为 `true` 的 `case`。
+
+```go
+score := 85
+
+switch {
+case score >= 90:
+    fmt.Println("A")
+case score >= 80:
+    fmt.Println("B")
+case score >= 70:
+    fmt.Println("C")
+default:
+    fmt.Println("D")
+}
+// 输出：B
+```
+
+这种写法比多层 `if-else` 更清晰。
+
+---
+
+### 5. `fallthrough`：强制进入下一个 case
+
+Go 的 `switch` 默认不穿透，但可以使用 `fallthrough` 强制执行下一个 `case` 的代码块（**不会重新判断下一个 case 的条件**）。
+
+```go
+num := 2
+
+switch num {
+case 1:
+    fmt.Println("一")
+    fallthrough
+case 2:
+    fmt.Println("二")
+    fallthrough
+case 3:
+    fmt.Println("三")
+}
+// 输出：
+// 二
+// 三
+```
+
+注意：`fallthrough` 只能穿透到**紧邻的下一个** `case`，不能跳跃。
+
+---
+
+### 6. 带初始化语句的 switch
+
+可以在 `switch` 关键字后添加一个简单的初始化语句（作用域仅限于整个 `switch` 块），常用于局部变量。
+
+```go
+switch x := 2; x {
+case 1:
+    fmt.Println("x is 1")
+case 2:
+    fmt.Println("x is 2")
+default:
+    fmt.Println("x is something else")
+}
+// 输出：x is 2
+```
+
+也可以和无表达式组合：
+
+```go
+switch x := 75; {
+case x >= 90:
+    fmt.Println("A")
+case x >= 80:
+    fmt.Println("B")
+case x >= 70:
+    fmt.Println("C")
+default:
+    fmt.Println("D")
+}
+// 输出：C
+```
+
+---
+
+### 7. Type Switch：类型断言分支
+
+`switch` 可以配合类型断言，根据**接口变量的实际类型**来执行不同分支。语法为 `switch v := x.(type)`。
+
+```go
+func printType(v interface{}) {
+    switch t := v.(type) {
+    case int:
+        fmt.Printf("int: %d\n", t)
+    case string:
+        fmt.Printf("string: %s\n", t)
+    case bool:
+        fmt.Printf("bool: %t\n", t)
+    case nil:
+        fmt.Println("nil value")
+    default:
+        fmt.Printf("未知类型: %T\n", t)
+    }
+}
+
+printType(42)      // int: 42
+printType("hello") // string: hello
+printType(true)    // bool: true
+```
+
+- `v.(type)` 只能在 `switch` 语句中使用。
+- `t` 是 `v` 转换成具体类型后的值，在该 `case` 内可以直接使用该类型的值。
+
+---
+
+### 8. `default` 的位置
+
+`default` 可以放在任何位置，但通常放在最后以提高可读性。
+
+```go
+switch n := 5; n {
+default:
+    fmt.Println("其他数字")
+case 1, 2:
+    fmt.Println("小数字")
+case 3, 4:
+    fmt.Println("中等数字")
+}
+// 输出：其他数字
+```
+
+注意：即使 `default` 写在最前面，也会在所有 `case` 都不匹配时才执行。
+
+---
+
+### 9. `case` 表达式不必是常量
+
+`case` 后面的值可以是变量、函数调用等，只要类型匹配且可比较。
+
+```go
+limit := 80
+score := 85
+
+switch score {
+case limit:
+    fmt.Println("刚好及格")
+case limit + 10:
+    fmt.Println("良好")
+default:
+    fmt.Println("其他")
+}
+// 输出：其他（因为 85 != 80 && 85 != 90）
+```
+
+---
+
+### 10. 空 `switch` 和空的 `case`
+
+- 空 `switch`（无表达式，无初始化语句）等价于 `switch true`，即无表达式的形式。
+- `case` 后面可以为空语句，但实际无意义。通常一个 `case` 分支至少有一条语句（可以什么都不写，但会直接执行下一个 `case` 吗？不会，必须用 `fallthrough` 才穿透）。空 `case` 不加 `fallthrough` 就什么也不做并退出。
+
+```go
+n := 2
+switch n {
+case 1:
+case 2:
+    fmt.Println("这是2") // 输出：这是2
+}
+```
+
+---
+
+### 11. 与 C/Java 的对比总结
+
+| 特性                 | Go                          | C/Java                     |
+| -------------------- | --------------------------- | -------------------------- |
+| 默认是否穿透         | 否（自动 break）            | 是（需要手动 break）       |
+| 多值匹配             | 支持（逗号分隔）            | 不支持（需多个 case 堆叠） |
+| 表达式类型           | 任意可比较类型（含字符串等） | 整数、字符、枚举等         |
+| 无表达式 switch      | 支持（替代 if-else 链）     | 不支持                     |
+| 类型 switch          | 支持（`x.(type)`）          | 不支持                     |
+| `fallthrough`        | 支持（仅穿透下一 case）     | 无（默认穿透，不需关键字） |
+| 初始化语句           | 支持                          | 不支持（C++17 以后部分支持）|
+
+---
+
+掌握这些用法后，你会发现 Go 的 `switch` 比许多语言的同类结构更优雅、更强大，适合多种分支逻辑场景。
+
+如果多个case同时满足：
+在 Go 语言的 `switch` 中，**如果多个 `case` 同时满足匹配条件，只会执行第一个（按书写顺序）匹配的 `case`**，然后自动退出整个 `switch`（除非使用了 `fallthrough`）。后续的匹配会被忽略。
+
+下面分几种情况说明：
+
+---
+
+### 1. 基本表达式匹配：值重复的情况
+
+如果同一个 `switch` 中两个不同的 `case` 包含了相同的值，编译器会报错，不允许这样写。  
+例如：
+
+```go
+switch x {
+case 1, 2:   // 包含 2
+    // ...
+case 2, 3:   // 也包含 2 → 编译错误：重复的 case 值 2
+    // ...
+}
+```
+
+所以正常情况下，**一个值只会精确匹配到一个 `case`**，不会出现“同时匹配多个 `case`”的情况。
+
+---
+
+### 2. 无表达式的 `switch`（`switch true`）
+
+这是最常见的“多个 `case` 同时满足”的场景。因为每个 `case` 都是一个布尔表达式，多个表达式可能同时为 `true`。  
+**规则**：按从上到下的顺序执行第一个为 `true` 的 `case`，后面的即使为 `true` 也不会执行。
+
+```go
+score := 85
+
+switch {
+case score >= 80:   // true
+    fmt.Println("良好")  // 输出：良好
+case score >= 70:   // 也是 true，但不会执行
+    fmt.Println("中等")
+}
+```
+
+**如果想同时执行多个 `case`**，必须显式使用 `fallthrough`（但注意 `fallthrough` 不会重新判断条件，直接进入下一个 `case` 块）：
+
+```go
+switch {
+case score >= 80:
+    fmt.Println("良好")
+    fallthrough
+case score >= 70:
+    fmt.Println("中等")   // 也会输出
+}
+// 输出：
+// 良好
+// 中等
+```
+
+---
+
+### 3. Type Switch 中的多个匹配
+
+在 `switch v.(type)` 中，一个类型可能同时满足多个 `case`（例如实现了多个接口，或具体类型与接口类型同时匹配）。  
+**规则**：同样按书写顺序执行第一个匹配的 `case`。
+
+```go
+var v interface{} = 123
+
+switch v.(type) {
+case int:
+    fmt.Println("int")       // 匹配，输出 int
+case interface{}:
+    fmt.Println("interface") // 不会执行
+}
+```
+
+---
+
+### 4. 带 `fallthrough` 的特殊情况
+
+`fallthrough` 会强制进入下一个 `case`，即使下一个 `case` 的条件原本不匹配（对于无表达式 `switch` 而言，下一个 `case` 的条件会被忽略，直接执行其代码块）。但这不属于“同时满足”，而是人为穿透。
+
+---
+
+### 总结
+
+| 场景                                 | 行为                                                         |
+| ------------------------------------ | ------------------------------------------------------------ |
+| 基本 `switch` 表达式（离散值）       | 一个值只能匹配一个 `case`（重复值编译错误）                  |
+| 无表达式的 `switch`（布尔条件）      | 按顺序执行第一个为 `true` 的 `case`                          |
+| Type Switch                          | 按顺序执行第一个类型匹配的 `case`                            |
+| 多个 `case` 同时满足条件（逻辑上）   | **只执行第一个**（后面的被忽略），除非使用 `fallthrough` 强制穿透 |
+
+**结论**：Go 的 `switch` 是**顺序匹配、首次命中即止**，不会出现多个 `case` 同时执行的情况（除非你主动用 `fallthrough`）。
